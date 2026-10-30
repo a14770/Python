@@ -30,4 +30,4 @@ while resposta == "S":
     pontuacao = pontuacoes[tentativa - 1]
     print(f"Pontuacao: {pontuacao}") 
 
-    resposta = input("Deja jogar novamente (S|N): ").upper()
+    resposta = input("Queres jogar de novo (S|N)").upper()

@@ -1,6 +1,6 @@
 from random import randint
 import os
-from biblioteca import z
+from Coisa_da_Aula.biblioteca import z
 
 x = 5
 print (f"O valor do x e {6}", end= "")
