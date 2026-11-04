@@ -11,7 +11,7 @@ def update_final_prince(d):
     d("final_preco") = round (d["preco"] * (1 + d ["iva"],2))
 
 def print_product(d):
-    return f"= O produto {d["product"]} com preço de {d["preco"]} e iva de {d["iva"]*100}%"
+    return f"= O produto {d["product"]} com preço de {d["preco"]} e iva de {d["iva"]*100}% com preco fina de {d["final_preco"]}"
 
 
 def menu():
