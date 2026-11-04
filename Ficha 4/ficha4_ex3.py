@@ -26,7 +26,22 @@ for livro in biblioteca.values():
     nome_livro = livro["titulo"]
     print("Titulo do livro",nome_livro)
 
-#2: Adiconar um novo livro a biblioteca
-biblioteca ["Livro 4"]
+#2: Adiconar um novo livro a biblioteca  
+biblioteca["livro4"] = {        
+    "titulo": "Doce da avó",
+    "autor": "Giovani Trindade",
+    "ano": 2010,
+    "disponivel": True
+}
+print(biblioteca)
 
-print (biblioteca)
+#Marca o livro 1 como nao disponivel
+biblioteca["livro1"]["disponivel"] = False
+
+#Retorna uma lista com os titulos do autor Luciano Ramalho
+livrosL = []
+for livro in biblioteca.values():
+    if livro["autor"] == "Luciano Ramalho":
+        livrosL.append(livro["titulo"])
+print(livrosL)
+
