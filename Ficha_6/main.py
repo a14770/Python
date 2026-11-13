@@ -1,72 +1,107 @@
-from random import randint, sample
+from random import randint
+
+
+def contar_inimigos_vivos(inimigos):
+    quantidade = 0
+
+    for inimigo in inimigos:
+        if inimigo["vida"] > 0:
+            quantidade = quantidade + 1
+
+    return quantidade
 
 
 def listar_inimigos_vivos(inimigos):
-    vivos = [inimigo for inimigo in inimigos if inimigo["vida"] > 0]
+    quantidade = 0
 
-    if len(vivos) == 0:
+    print("\nInimigos vivos:")
+    for inimigo in inimigos:
+        if inimigo["vida"] > 0:
+            print(f"{inimigo['numero']} - {inimigo['nome']} | Vida: {inimigo['vida']} | Ataque: {inimigo['ataque']}")
+            quantidade = quantidade + 1
+
+    if quantidade == 0:
         print("Nao existem inimigos vivos.")
-    else:
-        print("\nInimigos vivos:")
-        for numero, inimigo in enumerate(vivos, start=1):
-            print(f"{numero} - {inimigo['nome']} | Vida: {inimigo['vida']} | Ataque: {inimigo['ataque']}")
-
-    return vivos
 
 
 def consultar_estado(jogador, inimigos):
-    vivos = [inimigo for inimigo in inimigos if inimigo["vida"] > 0]
-    derrotados = len(inimigos) - len(vivos)
+    vivos = contar_inimigos_vivos(inimigos)
+    derrotados = len(inimigos) - vivos
 
     print("\nEstado do jogador:")
     print(f"Vida: {jogador['vida']}")
     print(f"Pontuacao: {jogador['pontos']}")
     print(f"Inimigos derrotados: {derrotados}")
-    print(f"Inimigos vivos: {len(vivos)}")
+    print(f"Inimigos vivos: {vivos}")
     print(f"Pocoes disponiveis: {jogador['pocoes']}")
     print(f"Pontos recuperados: {jogador['pontos_recuperados']}")
 
 
 def atacar_inimigo(jogador, inimigos):
-    vivos = listar_inimigos_vivos(inimigos)
+    listar_inimigos_vivos(inimigos)
+    encontrado = False
+    inimigo_escolhido = {}
 
-    while True:
-        escolha = input("Escolhe o numero do inimigo: ").strip()
-        try:
-            numero = int(escolha)
-        except ValueError:
-            numero = 0
+    while encontrado == False:
+        escolha = input("Escolhe o numero do inimigo: ")
 
-        if 1 <= numero <= len(vivos):
-            inimigo = vivos[numero - 1]
-            break
-        print("Escolha invalida. Introduz um numero da lista.")
+        for inimigo in inimigos:
+            if inimigo["numero"] == escolha:
+                if inimigo["vida"] > 0:
+                    inimigo_escolhido = inimigo
+                    encontrado = True
+
+        if encontrado == False:
+            print("Escolha invalida. Introduz o numero de um inimigo vivo.")
 
     dano = randint(10, jogador["ataque"])
-    inimigo["vida"] = max(0, inimigo["vida"] - dano)
-    print(f"Atacaste o {inimigo['nome']} e causaste {dano} pontos de dano.")
+    inimigo_escolhido["vida"] = inimigo_escolhido["vida"] - dano
 
-    if inimigo["vida"] == 0:
-        jogador["pontos"] += inimigo["pontos"]
-        print(f"Derrotaste o {inimigo['nome']} e ganhaste {inimigo['pontos']} pontos.")
+    if inimigo_escolhido["vida"] < 0:
+        inimigo_escolhido["vida"] = 0
+
+    print(f"Atacaste o {inimigo_escolhido['nome']} e causaste {dano} pontos de dano.")
+
+    if inimigo_escolhido["vida"] == 0:
+        jogador["pontos"] = jogador["pontos"] + inimigo_escolhido["pontos"]
+        print(f"Derrotaste o {inimigo_escolhido['nome']} e ganhaste {inimigo_escolhido['pontos']} pontos.")
     else:
-        dano_inimigo = randint(5, inimigo["ataque"])
-        jogador["vida"] = max(0, jogador["vida"] - dano_inimigo)
-        print(f"O {inimigo['nome']} contra-atacou e causou {dano_inimigo} pontos de dano.")
+        dano_inimigo = randint(5, inimigo_escolhido["ataque"])
+        jogador["vida"] = jogador["vida"] - dano_inimigo
+
+        if jogador["vida"] < 0:
+            jogador["vida"] = 0
+
+        print(f"O {inimigo_escolhido['nome']} contra-atacou e causou {dano_inimigo} pontos de dano.")
 
 
 def usar_pocao(jogador):
     if jogador["pocoes"] == 0:
         print("Ja nao tens pocoes.")
-    elif jogador["vida"] >= 100:
-        print("Nao podes usar uma pocao com 100 ou mais pontos de vida.")
     else:
-        vida_antes = jogador["vida"]
-        jogador["vida"] = min(100, jogador["vida"] + 25)
-        pontos_recuperados = jogador["vida"] - vida_antes
-        jogador["pontos_recuperados"] += pontos_recuperados
-        jogador["pocoes"] -= 1
-        print(f"Recuperaste {pontos_recuperados} pontos de vida.")
+        if jogador["vida"] >= 100:
+            print("Nao podes usar uma pocao com 100 ou mais pontos de vida.")
+        else:
+            vida_antes = jogador["vida"]
+            jogador["vida"] = jogador["vida"] + 25
+
+            if jogador["vida"] > 100:
+                jogador["vida"] = 100
+
+            pontos_recuperados = jogador["vida"] - vida_antes
+            jogador["pontos_recuperados"] = jogador["pontos_recuperados"] + pontos_recuperados
+            jogador["pocoes"] = jogador["pocoes"] - 1
+            print(f"Recuperaste {pontos_recuperados} pontos de vida.")
+
+
+def menu():
+    print("\n========== BATALHA ==========")
+    print("1 - Atacar inimigo")
+    print("2 - Consultar estado do jogador")
+    print("3 - Listar inimigos vivos")
+    print("4 - Usar pocao de cura")
+    print("5 - Fugir / terminar jogo")
+    return input("Escolhe uma opcao: ")
 
 
 print("========== BATALHA ==========\n")
@@ -80,46 +115,52 @@ jogador = {
 }
 
 tipos_inimigo = [
-    {"nome": "Goblin", "vida": 40, "ataque": 8, "pontos": 100},
-    {"nome": "Orc", "vida": 55, "ataque": 11, "pontos": 200},
-    {"nome": "Troll", "vida": 70, "ataque": 14, "pontos": 300},
-    {"nome": "Beast", "vida": 85, "ataque": 17, "pontos": 400},
-    {"nome": "Dragao", "vida": 100, "ataque": 20, "pontos": 500},
+    {"numero": "1", "nome": "Goblin", "vida": 40, "ataque": 8, "pontos": 100},
+    {"numero": "2", "nome": "Orc", "vida": 55, "ataque": 11, "pontos": 200},
+    {"numero": "3", "nome": "Troll", "vida": 70, "ataque": 14, "pontos": 300},
+    {"numero": "4", "nome": "Beast", "vida": 85, "ataque": 17, "pontos": 400},
+    {"numero": "5", "nome": "Dragao", "vida": 100, "ataque": 20, "pontos": 500},
 ]
 
 numero_inimigos = randint(3, 5)
-inimigos = sample(tipos_inimigo, numero_inimigos)
+inimigos = []
+
+for _ in range(numero_inimigos):
+    indice = randint(0, len(tipos_inimigo) - 1)
+    inimigo = tipos_inimigo.pop(indice)
+    inimigos.append(inimigo)
+
 resultado = ""
 
-while jogador["vida"] > 0 and len([inimigo for inimigo in inimigos if inimigo["vida"] > 0]) > 0:
-    print("\n========== BATALHA ==========")
-    print("1 - Atacar inimigo")
-    print("2 - Consultar estado do jogador")
-    print("3 - Listar inimigos vivos")
-    print("4 - Usar pocao de cura")
-    print("5 - Fugir / terminar jogo")
+while True:
+    if jogador["vida"] <= 0:
+        break
 
-    opcao = input("Escolhe uma opcao: ").strip()
+    if contar_inimigos_vivos(inimigos) == 0:
+        break
+
+    opcao = menu()
 
     if opcao == "1":
         atacar_inimigo(jogador, inimigos)
-    elif opcao == "2":
+    if opcao == "2":
         consultar_estado(jogador, inimigos)
-    elif opcao == "3":
+    if opcao == "3":
         listar_inimigos_vivos(inimigos)
-    elif opcao == "4":
+    if opcao == "4":
         usar_pocao(jogador)
-    elif opcao == "5":
+    if opcao == "5":
         resultado = "FUGA"
         break
-    else:
+    if opcao not in ["1", "2", "3", "4", "5"]:
         print("Opcao invalida. Tenta novamente.")
 
 if resultado == "FUGA":
     print("\nPartida terminada por fuga.")
-elif jogador["vida"] == 0:
-    print("\nDerrota! O jogador ficou sem vida.")
 else:
-    print("\nVitoria! Todos os inimigos foram derrotados.")
+    if jogador["vida"] == 0:
+        print("\nDerrota! O jogador ficou sem vida.")
+    else:
+        print("\nVitoria! Todos os inimigos foram derrotados.")
 
 consultar_estado(jogador, inimigos)
