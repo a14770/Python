@@ -1,0 +1,11 @@
+inventario = []
+
+def add(id: int, titulo: str, autor: str, quantidade: int, preco: float):
+    return {
+        "id": id,
+        "titulo": titulo,
+        "autor": autor,
+        "quantidade": quantidade,
+        "preco": preco,
+    }
+
